@@ -30,9 +30,7 @@ public class SimpleApp {
         {"https://yahoo.com", false},
         {"https://amazon.com", false},
         {"https://x.realreadme.com", false},
-        {"https://127.0.0.1:8443", false},
-        {"asdf", true},
-        {"fdsa", false}
+        {"https://127.0.0.100:8443", false}
     };
 
     results = new String[urlCollection.length][3];
