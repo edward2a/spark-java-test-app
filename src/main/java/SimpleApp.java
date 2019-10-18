@@ -8,9 +8,25 @@ import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.lang.String;
+import java.lang.Boolean;
+
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 
 public class SimpleApp {
   public static void main(String[] args) {
@@ -18,30 +34,26 @@ public class SimpleApp {
     String[][] results;
     boolean testPass = true;
 
-    String logFile = "README.md"; // Should be some file on your system
     //SparkConf conf = new SparkConf().setAppName("Simple Application");
     //JavaSparkContext sc = new JavaSparkContext(conf);
 
-    Object[][] urlCollection = new Object[][]{
-        {"https://dl.google.com", false},
-        {"https://www.googleapis.com", true},
-        {"https://drive.google.com", false},
-        {"https://google.com", false},
-        {"https://yahoo.com", false},
-        {"https://amazon.com", false},
-        {"https://x.realreadme.com", false},
-        {"https://127.0.0.100:8443", false}
-    };
+    if (System.getProperty("config.location") == null) {
+        System.out.println("ERROR: property config.location is null");
+        System.exit(1);
+    }
 
-    results = new String[urlCollection.length][3];
+    List<List<Object>> urlCollection = getConfig(System.getProperty("config.location"));
+    int collectionLength = urlCollection.toArray().length;
+
+    results = new String[collectionLength][3];
 
     System.out.format("%-32s%-10s%-32s%n", "URL", "RESULT", "REASON");
 
-    for (int i = 0; i < urlCollection.length; i++) {
+    for (int i = 0; i < collectionLength; i++) {
       try {
-        URL url = new URL(urlCollection[i][0].toString());
+        URL url = new URL(urlCollection.get(i).get(0).toString());
 
-        if ( ! urlProcess(i, url, (Boolean) urlCollection[i][1], results) ) {
+        if ( ! urlProcess(i, url, Boolean.valueOf(urlCollection.get(i).get(1).toString()), results) ) {
             testPass = false;
         }
       }
@@ -109,6 +121,40 @@ public class SimpleApp {
       }
     }
 
+  }
+
+  @SuppressWarnings("unchecked")
+  private static List<List<Object>> getConfig(String configLocation) {
+
+    JSONObject urlCollection = new JSONObject();
+
+    if (! configLocation.startsWith("gs://")) {
+        System.out.format("ERROR: URL not supported %s\n", configLocation);
+        System.exit(1);
+    }
+
+    configLocation = configLocation.replace("gs://", "");
+    String bucketName = configLocation.split("/", 2)[0];
+    String srcFilename = configLocation.split("/", 2)[1];
+
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    Blob blob = storage.get(BlobId.of(bucketName, srcFilename));
+    String data = new String(blob.getContent());
+
+    JSONParser parser = new JSONParser();
+
+    try {
+        urlCollection = (JSONObject) parser.parse(data);
+    }
+
+    catch (ParseException e) {
+        System.out.format("ERROR: Unable to parse JSON object - %s\n", e.getMessage());
+        System.exit(1);
+    }
+
+    List<List<Object>> urls = (List<List<Object>>) urlCollection.get("urls");
+
+    return urls;
   }
 
 }
