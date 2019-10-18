@@ -1,0 +1,12 @@
+{
+  "urls": [
+    ["https://dl.google.com", false],
+    ["https://www.googleapis.com", true],
+    ["https://drive.google.com", false],
+    ["https://google.com", false],
+    ["https://yahoo.com", false],
+    ["https://amazon.com", false],
+    ["https://x.realreadme.com", false],
+    ["https://127.0.0.100:8443", false]
+  ]
+}
