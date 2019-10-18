@@ -1,19 +1,27 @@
 # spark-java-test-app
+--
 
 This is a simple java app to test connectivity to URL endpoints.
 
 ## Usage
-Make sure the claspath in the jar has priority over local libraries.
-For spark, the following properties need to be set:
+#### For stand-alone:
+```
+java -cp simple-project-1.0-jar-with-dependencies.jar \
+    -Dconfig.location="gs://<bucket>/<config.json>" \
+    SimpleApp
+```
+
+#### For Apache Spark:
+The following properties need to be set in the job:
 ```
 spark.executor.userClassPathFirst = true
-
+spark.driver.userClassPathFirst = true
 ```
 
 ```
 java -cp simple-project-1.0-jar-with-dependencies.jar \
     -Dconfig.location="gs://<bucket>/<config.json>" \
-    SimpleApp
+    SparkSimpleApp
 ```
 
 ## Example
