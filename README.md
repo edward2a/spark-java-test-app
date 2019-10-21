@@ -12,16 +12,19 @@ java -cp simple-project-1.0-jar-with-dependencies.jar \
 ```
 
 #### For Apache Spark:
-The following properties need to be set in the job:
-```
-spark.executor.userClassPathFirst = true
-spark.driver.userClassPathFirst = true
-```
+The following configurations need to be set in the job:
 
 ```
-java -cp simple-project-1.0-jar-with-dependencies.jar \
-    -Dconfig.location="gs://<bucket>/<config.json>" \
-    SparkSimpleApp
+Main class or jar:
+------------------
+SparkSimpleApp
+
+
+Properties:
+-----------
+spark.executor.userClassPathFirst = true
+spark.driver.userClassPathFirst = true
+spark.config.location = gs://<bucket>/<config.json>
 ```
 
 ## Example
